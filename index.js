@@ -1,49 +1,58 @@
+const dotEnvVariables = require("dotenv").config();
+
 const blacklist = [];
 
-let customHidenMessage = '***';
+let errorCalback;
+
+let customHidenMessage = "***";
+
 let removeErrorStack = true;
 
-async function clearData(error){
-  console.log("error",error)
-    if(removeErrorStack){
-        delete error.stack;
-    }
-   
-    for(const variable of blacklist){
-      error.message = error.message.replace(variable, customHidenMessage);
-    }
-    
-}
-    
-function parseEnv(){
-  const parsedEnvKeys = Object.keys(process.env);
-  for (const key of parsedEnvKeys) {
-      blacklist.push(process.env[key]);
+async function clearData(error) {
+  if (removeErrorStack) {
+    delete error.stack;
+  }
+  for (const variable of blacklist) {
+    error.message = error.message.replace(variable, customHidenMessage);
   }
 }
 
-function init({hidenMessage, removeStackTrace}={}){
-  customHidenMessage = hidenMessage ?? '***';
-  removeErrorStack = removeStackTrace ?? true;
-  parseEnv();
- 
+function parseEnv() {
+  const envVariables = Object.keys(dotEnvVariables.parsed);
+
+  for (const key of envVariables) {
+    blacklist.push(dotEnvVariables.parsed[key]);
+  }
 }
 
-function addVariableToBlackList(variable){
-  if(!blacklist.includes(variable)){
+function init({
+  hidenMessage,
+  removeStackTrace,
+  calbackOnError,
+  removeEnv = true,
+} = {}) {
+  customHidenMessage = hidenMessage ?? "***";
+  removeErrorStack = removeStackTrace ?? true;
+  errorCalback = calbackOnError ?? null;
+  if (removeEnv) {
+    parseEnv();
+  }
+}
+
+function addVariableToBlackList(variable) {
+  if (!blacklist.includes(variable)) {
     blacklist.push(variable);
   }
 }
 
-
-function sanitizeErrors (error, request, response, next) {
-  
-  if(error){
+function sanitizeErrors(error, request, response, next) {
+  if (error) {
+    if (errorCalback) {
+      errorCalback(error);
+    }
     clearData(error);
-    
   }
-   next(error);
+  next(error);
 }
 
-
-module.exports = { sanitizeErrors, init, addVariableToBlackList }
+module.exports = { sanitizeErrors, init, addVariableToBlackList };

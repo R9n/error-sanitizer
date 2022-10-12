@@ -83,11 +83,12 @@ app.listen(3000);
 
 - Sanitize all erros when possible
 - Validate all and every user input that your api receive
-- Ever check if the user has permissiont to do what he's trying to do
+- Ever check if the user has permission to do what he's trying to do
+- Control and minimize returns in your API Responses
 
 ### ✅ A note about sensitive data exposure
 
-The leak of sensitive data is one of the most difficult breaches to mitigate. This is because it can occur at several levels, at the networks layer, at the authentication layer.
+The leak of sensitive data is one of the most difficult breaches to mitigate. This is because it can occur at several levels, at the networks layer, at the authentication layer etc.
 That's why this lib focuses on sanitizing the errors, which are often used by hackers to get information about the apis they are trying to attack.
 I suggest a little more in-depth reading on the owasp website: https://owasp.org/www-project-top-ten/2017/A3_2017-Sensitive_Data_Exposure
 

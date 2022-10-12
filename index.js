@@ -18,7 +18,7 @@ async function clearData(error) {
 }
 
 function parseEnv() {
-  const envVariables = Object.keys(dotEnvVariables.parsed);
+  const envVariables = Object.keys(dotEnvVariables?.parsed ?? {});
 
   for (const key of envVariables) {
     blacklist.push(dotEnvVariables.parsed[key]);
@@ -45,14 +45,28 @@ function addVariableToBlackList(variable) {
   }
 }
 
-function sanitizeErrors(error, request, response, next) {
+async function sanitizeErrors(error, request, response, next) {
   if (error) {
     if (errorCalback) {
-      errorCalback(error);
+      await errorCalback(error);
     }
     clearData(error);
   }
-  next(error);
+  return next(error);
 }
 
-module.exports = { sanitizeErrors, init, addVariableToBlackList };
+function getCurrentLibConfig() {
+  return {
+    blacklist,
+    errorCalback,
+    customHidenMessage,
+    removeErrorStack,
+  };
+}
+
+module.exports = {
+  sanitizeErrors,
+  init,
+  addVariableToBlackList,
+  getCurrentLibConfig,
+};

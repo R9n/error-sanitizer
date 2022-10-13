@@ -37,6 +37,8 @@ To use the middleware is simple. We have 3 exposed methods, **init**, **addVaria
 
 The method **addVariableToBlackList** receive as argument an property that will be removed from the next errors messages.
 
+The method **removeFromBlacklist** receive as argument an property that will be removed from the blacklist. In other words, will be displayed in the next errors messages.
+
 The **sanitizeErrors** method is the midleware itself, and should be used after all routes of your api.
 
 #### Example
@@ -44,7 +46,7 @@ The **sanitizeErrors** method is the midleware itself, and should be used after 
 ```
 const Express = require("express");
 
-const { init, addVariableToBlackList, sanitizeErrors } = require("error-sanitizer");
+const { init, addVariableToBlackList, sanitizeErrors, removeFromBlacklist } = require("error-sanitizer");
 
 function simpleErrorCallback(error) {
   console.log(`this callback will be called every time that an error happens, BEFORE error
@@ -60,10 +62,14 @@ app.get("/", (request, response) => {
 
   addVariableToBlackList(tokenFromSomeApi); // you can add more variables to hide from unexpected erros
 
+  removeFromBlacklist(String(process.env.API_NAME)) // The API_NAME is a property that i want to show on errros message, so i remove it from blacklist.
+
   throw new Error(
     `generic error with sensitive data:
       ${String(process.env.DB_HOST)}:${String(process.env.DB_PORT)}
-      api token: ${tokenFromSomeApi}`
+      api token: ${tokenFromSomeApi}
+      Error on api: ${String(process.env.API_NAME)}
+      `
   );
 
   // The process.env.DB_HOST and process.env.DB_PORT variables are in the env.example file
@@ -77,7 +83,7 @@ app.listen(3000);
 }
 ```
 
-**Resulting error message is like this**: `generic error with sensitive data: ***:*** api token: ***`
+**Resulting error message is like this**: `Error: generic error with sensitive data: ***:"*** api token: *** Error on api: API-1`
 
 ### ✅ Tips to help to mitigate data exposure breach
 

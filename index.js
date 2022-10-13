@@ -45,6 +45,17 @@ function addVariableToBlackList(variable) {
   }
 }
 
+function removeFromBlacklist(variable) {
+  if (!variable) {
+    return;
+  }
+  const elementIndex = blacklist.indexOf(variable);
+
+  if (elementIndex > -1) {
+    blacklist.splice(elementIndex, 1);
+  }
+}
+
 async function sanitizeErrors(error, request, response, next) {
   if (error) {
     if (errorCalback) {
@@ -69,4 +80,5 @@ module.exports = {
   init,
   addVariableToBlackList,
   getCurrentLibConfig,
+  removeFromBlacklist,
 };

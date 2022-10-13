@@ -3,17 +3,15 @@ const {
   init,
   sanitizeErrors,
   getCurrentLibConfig,
+  removeFromBlacklist,
 } = require("../index");
-
-const sinon = require("sinon");
 
 describe("index.js", () => {
   afterEach(() => {
     init();
-    sinon.restore();
   });
 
-  it("Should remove sensitive data from error message", () => {
+  it("Should remove sensitive data from error message", async () => {
     const mockedRequest = {};
 
     const mockedResponse = {};
@@ -36,13 +34,12 @@ describe("index.js", () => {
     try {
       throw customError;
     } catch (error) {
-      const sanitizedError = sanitizeErrors(
+      const sanitizedError = await sanitizeErrors(
         error,
         mockedRequest,
         mockedResponse,
         nextCalback
       );
-      console.log(sanitizedError.message);
       const hasSensitiveData1 = sanitizedError.message.includes(sensiveData1);
       const hasSensitiveDat2 = sanitizedError.message.includes(sensiveData1);
       expect(hasSensitiveData1).toBe(false);
@@ -50,7 +47,7 @@ describe("index.js", () => {
     }
   });
 
-  it("Should config the lib correctly", () => {
+  it("Should config the lib correctly", async () => {
     const mockedRequest = {};
 
     const mockedResponse = {};
@@ -78,7 +75,7 @@ describe("index.js", () => {
     try {
       throw customError;
     } catch (error) {
-      const sanitizedError = sanitizeErrors(
+      const sanitizedError = await sanitizeErrors(
         error,
         mockedRequest,
         mockedResponse,
@@ -103,5 +100,17 @@ describe("index.js", () => {
     expect(libConfig.errorCalback).toBe(null);
     expect(libConfig.customHidenMessage).toBe("***");
     expect(libConfig.removeErrorStack).toBe(true);
+  });
+
+  it("Should remove property from blacklist", () => {
+    addVariableToBlackList("teste-1234");
+
+    removeFromBlacklist("teste-1234");
+
+    removeFromBlacklist(undefined);
+
+    const libConfig = getCurrentLibConfig();
+
+    expect(libConfig.blacklist.includes("teste-1234")).toBe(false);
   });
 });
